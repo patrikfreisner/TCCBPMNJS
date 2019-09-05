@@ -1,0 +1,35 @@
+#js-canvas {
+  height: 92vh;
+  width: 100%;
+}
+
+.sidebar {
+  margin-right: 15px;
+  margin-left: 15px;
+  min-width: 250px;
+  max-width: 250px;
+  overflow: auto;
+  height: 92vh;
+}
+
+.sidebar-head {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.sidebar-body {
+  width: 100%;
+}
+
+.myContainer {
+  width: 100%;
+  display: inline-flex;
+  background-color: #f8f8f8;
+}
+
+hr.vertical-rule {
+  border: none;
+  border-left: 1px solid hsla(200, 10%, 50%, 100);
+  height: 88vh;
+  width: 1px;
+}
