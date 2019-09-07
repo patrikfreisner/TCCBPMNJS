@@ -29,6 +29,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   title = 'Angular/BPMN';
   modeler = new BpmnJS();
   diagramNot: any;
+  notationProperties: any;
 
   constructor(
     private modalService: ModalService,
@@ -53,9 +54,6 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       setTimeout(() => {
         $('.bpmn-icon-trash').hide();
       }, 1);
-      alert('removed!');
-      this.getCurrentXML();
-      this.saveXML();
     });
     eventBus.on('element.click', (event, payload) => {
       if (payload.element.type !== 'bpmn:SequenceFlow') {
@@ -83,9 +81,13 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     });
   }
 
-  deleteMe(variable) {
-    const canvas = this.modeler.get('canvas');
-    canvas.removeShape(variable);
+  deleteMe(variable: any) {
+    const elementRegistry = this.modeler.get('elementRegistry');
+    const element = elementRegistry.get(variable);
+    const modeling = this.modeler.get('modeling');
+    modeling.removeShape(element);
+    // this.modeler.get('canvas').removeShape(element);
+    this.getCurrentXML();
   }
 
   saveXML() {
@@ -98,6 +100,13 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       this.diagramNot = rdnvar.definitions.BPMNDiagram[0].BPMNPlane[0].BPMNShape;
       console.log(rdnvar);
     });
+  }
+
+  getNotationInfo(notationId: any) {
+    const elementRegistry = this.modeler.get('elementRegistry');
+    const element = elementRegistry.get(notationId);
+    this.notationProperties = element;
+    return element;
   }
 
   getCurrentXML() {

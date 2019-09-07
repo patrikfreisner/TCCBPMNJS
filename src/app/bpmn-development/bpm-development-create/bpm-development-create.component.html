@@ -6,7 +6,7 @@
     <div id="sidebar-body">
       <div *ngFor="let obj of diagramNot" style="margin-bottom: 10px;" class="card">
         <div style="padding: 5px;" class="card-body">
-          <h5 align="center">{{ setNotationName(obj.$.bpmnElement) }}</h5>
+          <h5 align="center">{{getNotationInfo(obj.$.bpmnElement).businessObject.name ||  setNotationName(obj.$.bpmnElement)}}</h5>
           <a (click)="open(content)" style="margin-right: 10px;" class="btn btn-primary col-8">Propriedades</a>
           <a (click)="deleteMe(obj.$.bpmnElement)" class="btn btn-primary col-3">
             Del
@@ -24,7 +24,7 @@
 
 <ng-template #content let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Hi there!</h4>
+    <h4 class="modal-title" id="modal-basic-title">{{notationProperties.businessObject.name || setNotationName(notationProperties.businessObject.id)}}</h4>
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
