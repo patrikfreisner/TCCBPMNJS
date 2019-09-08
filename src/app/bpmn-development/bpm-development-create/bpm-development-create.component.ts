@@ -47,12 +47,11 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     eventBus.on('shape.added', (event, payload) => {
       setTimeout(() => {
         this.getCurrentXML();
-        $('.bpmn-icon-trash').hide();
       }, 1);
     });
     eventBus.on('shape.removed', (event, payload) => {
       setTimeout(() => {
-        $('.bpmn-icon-trash').hide();
+        this.getCurrentXML();
       }, 1);
     });
     eventBus.on('element.click', (event, payload) => {
@@ -63,6 +62,10 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   }
 
   open(content) {
+    this.modalService.open(content);
+  }
+  openPropertiesContent(content, notationId) {
+    this.notationProperties = this.getNotationInfo(notationId);
     this.modalService.open(content);
   }
 
@@ -105,7 +108,6 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   getNotationInfo(notationId: any) {
     const elementRegistry = this.modeler.get('elementRegistry');
     const element = elementRegistry.get(notationId);
-    this.notationProperties = element;
     return element;
   }
 
@@ -123,6 +125,6 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   }
 
   setNotationName(value: string) {
-    return value.replace(/(?=_).+/g, '');
+    return value.replace('bpmn:', '');
   }
 }

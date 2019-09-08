@@ -6,8 +6,9 @@
     <div id="sidebar-body">
       <div *ngFor="let obj of diagramNot" style="margin-bottom: 10px;" class="card">
         <div style="padding: 5px;" class="card-body">
-          <h5 align="center">{{getNotationInfo(obj.$.bpmnElement).businessObject.name ||  setNotationName(obj.$.bpmnElement)}}</h5>
-          <a (click)="open(content)" style="margin-right: 10px;" class="btn btn-primary col-8">Propriedades</a>
+          <h5
+            align="center">{{getNotationInfo(obj.$.bpmnElement).businessObject.name || setNotationName(getNotationInfo(obj.$.bpmnElement).businessObject.$type)}}</h5>
+          <a (click)="openPropertiesContent(content, obj.$.bpmnElement)" style="margin-right: 10px;" class="btn btn-primary col-8">Propriedades</a>
           <a (click)="deleteMe(obj.$.bpmnElement)" class="btn btn-primary col-3">
             Del
           </a>
@@ -24,13 +25,27 @@
 
 <ng-template #content let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{notationProperties.businessObject.name || setNotationName(notationProperties.businessObject.id)}}</h4>
+    <h4 class="modal-title" id="modal-basic-title"> Propriedades
+      | {{notationProperties.businessObject.di.name || setNotationName(notationProperties.businessObject.di.id)}}</h4>
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-    <p>Hello, World!</p>
+    <div class="container row">
+      <div class="col-sm-6">
+        <label> ID: </label>
+        <input type="text" class="form-control" value="{{notationProperties.businessObject.di.id}}" disabled>
+      </div>
+      <div class="col-sm-6">
+        <label> Display_Name: </label>
+        <input type="text" class="form-control"
+               value="{{notationProperties.businessObject.name || 'N/A'}}" disabled>
+      </div>
+    </div>
+    <p>
+      {{notationProperties.businessObject | json}}
+    </p>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark" (click)="c('Save click')">Save</button>
