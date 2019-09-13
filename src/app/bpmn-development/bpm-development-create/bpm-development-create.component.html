@@ -4,50 +4,97 @@
       <h1 align="center"> Menu </h1>
     </div>
     <div id="sidebar-body">
-      <div *ngFor="let obj of diagramNot" style="margin-bottom: 10px;" class="card">
-        <div style="padding: 5px;" class="card-body">
-          <h5
-            align="center">{{getNotationInfo(obj.$.bpmnElement).businessObject.name || setNotationName(getNotationInfo(obj.$.bpmnElement).businessObject.$type)}}</h5>
-          <a (click)="openPropertiesContent(content, obj.$.bpmnElement)" style="margin-right: 10px;" class="btn btn-primary col-8">Propriedades</a>
-          <a (click)="deleteMe(obj.$.bpmnElement)" class="btn btn-primary col-3">
+      <div *ngFor="let obj of diagramNot" class="card" style="margin-bottom: 10px;">
+        <div class="card-body" style="padding: 5px;">
+          <h5 align="center">
+            {{getNotationInfo(obj.bpmNotationCode).businessObject.name || setNotationName(getNotationInfo(obj.bpmNotationCode).businessObject.$type)}}
+          </h5>
+          <a (click)="openPropertiesContent(content, obj.bpmNotationCode)" class="btn btn-primary col-8"
+             style="margin-right: 10px;">Propriedades</a>
+          <a (click)="deleteMe(obj.bpmNotationCode)" class="btn btn-primary col-3">
             Del
           </a>
         </div>
       </div>
     </div>
   </div>
+
   <hr class="vertical-rule">
 
   <!-- BPMN-JS render space bellow :)-->
   <div id="js-canvas"></div>
 </div>
 
-
 <ng-template #content let-c="close" let-d="dismiss">
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title"> Propriedades
       | {{notationProperties.businessObject.di.name || setNotationName(notationProperties.businessObject.di.id)}}</h4>
-    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+    <button (click)="d('Cross click')" aria-label="Close" class="close" type="button">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
+
   <div class="modal-body">
-    <div class="container row">
+    <div class="nestedFormContainer">
       <div class="col-sm-6">
         <label> ID: </label>
-        <input type="text" class="form-control" value="{{notationProperties.businessObject.di.id}}" disabled>
+        <input class="form-control" disabled type="text" value="{{notationProperties.businessObject.di.id}}">
       </div>
       <div class="col-sm-6">
         <label> Display_Name: </label>
-        <input type="text" class="form-control"
-               value="{{notationProperties.businessObject.name || 'N/A'}}" disabled>
+        <input class="form-control" disabled type="text" value="{{notationProperties.businessObject.name || 'N/A'}}">
       </div>
     </div>
-    <p>
-      {{notationProperties.businessObject | json}}
-    </p>
+
+    <form [formGroup]="mainform" id="notationForm">
+      <div id="formContainer">
+        <h4 align="center"> Notation Properties </h4>
+        <div class="col-sm-12">
+          <label>
+            Resource:
+            <input class="form-control" formControlName="resource" type="text">
+          </label>
+        </div>
+        <div class="nestedFormContainer" formGroupName="compound">
+          <div class="col-sm-12">
+            <label>
+              Compound name:
+              <input class="form-control" formControlName="name" type="text">
+            </label>
+          </div>
+        </div>
+        <div class="nestedFormContainer" formGroupName="canHandle">
+          <div class="col-sm-6">
+            <label>
+              CanHandle Time:
+              <input class="form-control" formControlName="time" type="text">
+            </label>
+          </div>
+          <div class="col-sm-6">
+            <label>
+              CanHandle Quantity:
+              <input class="form-control" formControlName="quantity" type="text">
+            </label>
+          </div>
+        </div>
+        <div class="nestedFormContainer" formGroupName="canProduce">
+          <div class="col-sm-6">
+            <label>
+              CanProduce Time:
+              <input class="form-control" formControlName="time" type="text">
+            </label>
+          </div>
+          <div class="col-sm-6">
+            <label>
+              CanProduce Quantity:
+              <input class="form-control" formControlName="quantity" type="text">
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="c('Save click')">Save</button>
+    <button (click)="onSubmit()" [disabled]="!mainform.valid" class="btn btn-outline-dark" type="button">Save</button>
   </div>
 </ng-template>

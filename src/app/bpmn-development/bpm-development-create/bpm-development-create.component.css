@@ -33,3 +33,19 @@ hr.vertical-rule {
   height: 88vh;
   width: 1px;
 }
+
+#notationForm {
+  width: 100%;
+  margin: 10px 10px 10px 0px;
+
+}
+
+
+.nestedFormContainer {
+  display: flex;
+}
+
+
+#formContainer * label {
+  width: 100%;
+}

@@ -11,6 +11,7 @@ import {BpmDevelopmentCreateComponent} from './bpmn-development/bpm-development-
 import {NgbModalBackdrop} from '@ng-bootstrap/ng-bootstrap/modal/modal-backdrop';
 import {ModalService} from './Service/modal.service';
 import {NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 const appRoutes: Routes = [
   {path: '', redirectTo: '/menu', pathMatch: 'full'},
@@ -35,7 +36,9 @@ const appRoutes: Routes = [
     BrowserAnimationsModule,
     RouterModule.forRoot(appRoutes),
     HttpClientModule,
-    NgbModule
+    NgbModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [ModalService, NgbActiveModal],
   bootstrap: [AppComponent],
