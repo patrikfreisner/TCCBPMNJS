@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Response} from '@angular/http';
 import {Observable, throwError} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 
@@ -24,30 +23,26 @@ export class GenericDataServiceService {
   ) {
   }
 
-  public getObjects(): Observable<any[]> {
-    return this.http.get(this.apiBasicUrl).pipe(
-      map((resp: Response) => {
-        const collection: Array<any> = resp.json();
-        const customerCollection: any[] = [];
+  public getObjects(url: string): Observable<any[]> {
+    return this.http.get<any>(url).pipe(
+      map((data: any[]) => {
+        const collection: Array<any> = data;
+        const objectCollection: any[] = [];
 
         collection.forEach(item => {
-          customerCollection.push(item as any);
+          objectCollection.push(item as any);
         });
 
-        return customerCollection;
+        return objectCollection;
       }),
       catchError(this.handleError)
     );
   }
 
-  public getObjectById(id: number): Observable<any> {
-    const url = `${this.apiBasicUrl}/${id}`;
-    return this.http.get(url).pipe(
-      map((resp: Response) => {
-        const cust = resp.json();
-
-        return cust as any;
-      }),
+  public getObjectById(url: string, id: number): Observable<any> {
+    const URL_STR = `${url}/${id}`;
+    console.log(URL_STR);
+    return this.http.get<any>(URL_STR).pipe(
       catchError(this.handleError)
     );
   }
@@ -59,8 +54,8 @@ export class GenericDataServiceService {
     );
   }
 
-  public updateObject(customer: any): Observable<any> {
-    return this.http.put(`${this.apiBasicUrl}/${customer.id}`, customer).pipe(
+  public updateObject(url: string, object: any): Observable<any> {
+    return this.http.put(`${url}/${object.id}`, object).pipe(
       tap((c: any) => console.log('updateCustomer')),
       catchError(this.handleError)
     );

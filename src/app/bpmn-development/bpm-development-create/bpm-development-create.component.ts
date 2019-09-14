@@ -14,6 +14,8 @@ import {ModalService} from '../../Service/modal.service';
 import {Diagram} from 'src/app/Models/diagram';
 import {FormBuilder} from '@angular/forms';
 import {Notation} from 'src/app/Models/notation';
+import {GenericDataServiceService} from '../../Service/generic-data-service.service';
+import {Router} from '@angular/router';
 
 const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
   <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
@@ -33,7 +35,7 @@ const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
 })
 
 export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestroy {
-
+  thisDiagramId = history.state.diagramId;
   title = 'Angular/BPMN';
   modeler = new BpmnJS();
   diagramNot = new Array();
@@ -44,6 +46,8 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   constructor(
     private modalService: ModalService,
     private formBuilder: FormBuilder,
+    private genericDataService: GenericDataServiceService,
+    private router: Router,
   ) {
   }
 
@@ -55,10 +59,35 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
 
   ngAfterContentInit(): void {
-
-    this.modeler.attachTo($('#js-canvas'));
-    this.modeler.importXML(INIT_XML);
-    $('.bjs-powered-by').css('display', 'none');
+    if (this.thisDiagramId === undefined) {
+      // TODO
+      this.genericDataService.getObjects('http://192.168.56.102:3000/diagrams').subscribe(
+        (diagrams: any[]) => {
+          const diagram = diagrams[diagrams.length - 1];
+          this.thisDiagramId = diagrams[diagrams.length - 1].id;
+          this.modeler.attachTo($('#js-canvas'));
+          this.modeler.importXML(diagram.bpm_diagram_code);
+          $('.bjs-powered-by').css('display', 'none');
+        },
+        () => {
+          alert('An error ocurred when initializing XML');
+          this.router.navigate(['/menu']);
+        }
+      );
+    } else {
+      this.genericDataService.getObjectById('http://192.168.56.102:3000/diagrams', this.thisDiagramId).subscribe(
+        (diagram) => {
+          this.modeler.attachTo($('#js-canvas'));
+          console.log(diagram.bpm_diagram_code);
+          this.modeler.importXML(diagram.bpm_diagram_code);
+          $('.bjs-powered-by').css('display', 'none');
+        },
+        (err) => {
+          alert('An error ocurred!');
+          this.router.navigate(['/menu']);
+        }
+      );
+    }
 
     const eventBus = this.modeler.get('eventBus');
     eventBus.on('shape.added', (event, payload) => {
@@ -105,13 +134,28 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     const element = elementRegistry.get(variable);
     const modeling = this.modeler.get('modeling');
     modeling.removeShape(element);
-    // this.modeler.get('canvas').removeShape(element);
     this.getCurrentXML();
+  }
+
+  saveNotation() {
+    const nt = new Notation();
+    console.warn(nt);
+
+    this.genericDataService.updateObject('http://192.168.56.102:3000/notations', nt).subscribe(
+      (data) => {
+        alert('Salvo: ');
+      },
+      (err) => {
+        console.log('Didn\'t worked! Err: ');
+        console.log(err);
+      }
+    );
   }
 
 
   saveXML() {
-    let dg = new Diagram();
+    const dg = new Diagram();
+    dg.id = this.thisDiagramId;
     dg.bpm_diagram_code = '';
     this.modeler.saveXML({format: true}, (err, CHANGED_XML) => {
       const stripNS = xml2js.processors.stripPrefix;
@@ -119,6 +163,16 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     });
     dg.notation = this.diagramNot;
     console.warn(dg);
+
+    this.genericDataService.updateObject('http://192.168.56.102:3000/diagrams', dg).subscribe(
+      (data) => {
+        alert('Salvo!');
+      },
+      (err) => {
+        console.log('Didn\'t worked! Err: ');
+        console.log(err);
+      }
+    );
   }
 
 
