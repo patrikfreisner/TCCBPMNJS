@@ -11,7 +11,8 @@ export class GenericDataServiceService {
 
   httpOptions = {
     headers: new HttpHeaders({
-      'content-type': 'application/json', 'Access-Control-Allow-Origin': '*',
+      'content-type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
     })
   };
@@ -23,7 +24,7 @@ export class GenericDataServiceService {
   ) {
   }
 
-  public getObject(): Observable<any[]> {
+  public getObjects(): Observable<any[]> {
     return this.http.get(this.apiBasicUrl).pipe(
       map((resp: Response) => {
         const collection: Array<any> = resp.json();
@@ -51,9 +52,9 @@ export class GenericDataServiceService {
     );
   }
 
-  public createObject(customer: any): Observable<any> {
-    return this.http.post(this.apiBasicUrl, customer, this.httpOptions).pipe(
-      tap((c: any) => console.log('createCustomer')),
+  public createObject(url: string, object: any): Observable<any> {
+    return this.http.post(url, object, this.httpOptions).pipe(
+      tap((c: any) => console.log('createObject')),
       catchError(this.handleError)
     );
   }

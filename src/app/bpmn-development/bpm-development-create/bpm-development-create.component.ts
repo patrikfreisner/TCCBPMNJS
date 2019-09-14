@@ -45,29 +45,8 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     private modalService: ModalService,
     private formBuilder: FormBuilder,
   ) {
-    this.mainform = this.formBuilder.group({
-      resource: [''],
-      compound: this.formBuilder.group({
-        name: ['']
-      }),
-      canHandle: this.formBuilder.group({
-        time: [''],
-        quantity: [''],
-        resource: this.formBuilder.group({
-          name: [''],
-        })
-      }),
-      canProduce: this.formBuilder.group({
-        time: [''],
-        quantity: [''],
-        resource: this.formBuilder.group({
-          name: [''],
-        })
-      }),
-      isConstraint: false,
-    });
-    // dependencies: Notation;
   }
+
 
   onSubmit() {
     // TODO: Use EventEmitter with form value
@@ -101,6 +80,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
   openPropertiesContent(content, notationId) {
     this.notationProperties = this.getNotationInfo(notationId);
+    this.initializeForm();
     this.modalService.open(content);
   }
 
@@ -132,15 +112,13 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
   saveXML() {
     let dg = new Diagram();
-    dg.bpmDiagramCode = this.modeler.saveXML({format: true}, (err, CHANGED_XML) => {
+    dg.bpm_diagram_code = '';
+    this.modeler.saveXML({format: true}, (err, CHANGED_XML) => {
       const stripNS = xml2js.processors.stripPrefix;
-      let rdnvar: any;
-      xml2js.parseString(CHANGED_XML, {tagNameProcessors: [stripNS]}, (ERR, result) => {
-        rdnvar = result;
-      });
-      return rdnvar;
+      dg.bpm_diagram_code = CHANGED_XML.toString();
     });
     dg.notation = this.diagramNot;
+    console.warn(dg);
   }
 
 
@@ -162,7 +140,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
         rdnvar = result;
       });
       // Check if variable contains any shape
-      if (rdnvar.definitions.BPMNDiagram[0].BPMNPlane[0].BPMNShape != undefined) {
+      if (rdnvar.definitions.BPMNDiagram[0].BPMNPlane[0].BPMNShape !== undefined) {
         rdnvar.definitions.BPMNDiagram[0].BPMNPlane[0].BPMNShape.forEach(shape => {
           let notation = new Notation();
           notation.bpmNotationCode = shape.$.bpmnElement;
@@ -170,6 +148,31 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
         });
       }
     });
+  }
+
+  initializeForm() {
+    this.mainform = this.formBuilder.group({
+      resource: [''],
+      compound: this.formBuilder.group({
+        name: ['']
+      }),
+      canHandle: this.formBuilder.group({
+        time: [''],
+        quantity: [''],
+        resource: this.formBuilder.group({
+          name: [''],
+        })
+      }),
+      canProduce: this.formBuilder.group({
+        time: [''],
+        quantity: [''],
+        resource: this.formBuilder.group({
+          name: [''],
+        })
+      }),
+      isConstraint: false,
+    });
+    // dependencies: Notation;
   }
 
   setNotationName(value: string) {
