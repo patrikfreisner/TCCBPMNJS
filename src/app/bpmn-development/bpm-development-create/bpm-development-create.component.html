@@ -51,13 +51,13 @@
     <form [formGroup]="mainform" id="notationForm">
       <div id="formContainer">
         <h4 align="center"> Notation Properties </h4>
-        <div class="col-sm-12">
-          <label>
-            Resource:
-            <input class="form-control" formControlName="resource" type="text">
-          </label>
-        </div>
-        <div class="nestedFormContainer" formGroupName="compound">
+<!--        <div class="col-sm-12">-->
+        <!--          <label>-->
+        <!--            Resource:-->
+        <!--            <input class="form-control" formControlName="resource" type="text">-->
+        <!--          </label>-->
+        <!--        </div>-->
+        <div class="nestedFormContainer" formGroupName="compound_attributes">
           <div class="col-sm-12">
             <label>
               Compound name:
@@ -65,7 +65,7 @@
             </label>
           </div>
         </div>
-        <div class="nestedFormContainer" formGroupName="canHandle">
+        <div class="nestedFormContainer" formGroupName="can_handle_attributes">
           <div class="col-sm-6">
             <label>
               CanHandle Time:
@@ -79,7 +79,7 @@
             </label>
           </div>
         </div>
-        <div class="nestedFormContainer" formGroupName="canProduce">
+        <div class="nestedFormContainer" formGroupName="can_produce_attributes">
           <div class="col-sm-6">
             <label>
               CanProduce Time:
@@ -97,6 +97,6 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button (click)="onSubmit()" [disabled]="!mainform.valid" class="btn btn-outline-dark" type="button">Save</button>
+    <button (click)="saveNotation(); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark" type="button">Save</button>
   </div>
 </ng-template>

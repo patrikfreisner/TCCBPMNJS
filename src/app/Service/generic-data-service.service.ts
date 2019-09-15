@@ -61,9 +61,15 @@ export class GenericDataServiceService {
     );
   }
 
-  public deleteObject(id: number): Observable<{}> {
-    const url = `${this.apiBasicUrl}/${id}`;
-    return this.http.delete(url).pipe(
+  public deleteObject(url: string, id: number): Observable<{}> {
+    const url_string = `${url}/${id}`;
+    return this.http.delete(url_string).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  public searchByNotationCode(notationCode: string): Observable<any> {
+    return this.http.get('http://192.168.56.102:3000/searchByNotationCode?bpm_notation_code=' + notationCode).pipe(
       catchError(this.handleError)
     );
   }

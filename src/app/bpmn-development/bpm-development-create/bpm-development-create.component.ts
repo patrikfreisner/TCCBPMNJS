@@ -110,6 +110,23 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   openPropertiesContent(content, notationId) {
     this.notationProperties = this.getNotationInfo(notationId);
     this.initializeForm();
+
+    this.genericDataService.searchByNotationCode(notationId + '_di').subscribe(
+      (notation) => {
+        const nt = notation[notation.length - 1];
+        this.mainform.patchValue(nt);
+        this.mainform.get('compound_attributes.name').setValue(nt.compound.name);
+        this.mainform.get('can_handle_attributes.quantity').setValue(nt.can_handle.quantity);
+        this.mainform.get('can_handle_attributes.time').setValue(nt.can_handle.time);
+        this.mainform.get('can_produce_attributes.quantity').setValue(nt.can_produce.quantity);
+        this.mainform.get('can_produce_attributes.time').setValue(nt.can_produce.time);
+        console.log(this.mainform.value);
+      },
+      (err) => {
+        console.error(err);
+      }
+    );
+
     this.modalService.open(content);
   }
 
@@ -138,15 +155,21 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   }
 
   saveNotation() {
-    const nt = new Notation();
-    console.warn(nt);
+    let dataToSend: any = null;
+    dataToSend = this.mainform.value;
+    dataToSend.bpm_notation_code = this.notationProperties.businessObject.di.id;
+    dataToSend.resource = this.setNotationName(this.notationProperties.businessObject.$type);
+    dataToSend.diagram_id = this.thisDiagramId;
 
-    this.genericDataService.updateObject('http://192.168.56.102:3000/notations', nt).subscribe(
+    console.warn(dataToSend);
+
+    this.genericDataService.createObject('http://192.168.56.102:3000/notations', dataToSend).subscribe(
       (data) => {
-        alert('Salvo: ');
+        alert('Salvo!');
+        this.saveXML();
       },
       (err) => {
-        console.log('Didn\'t worked! Err: ');
+        console.log('Didn\'t worked! Err: \n');
         console.log(err);
       }
     );
@@ -196,7 +219,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       // Check if variable contains any shape
       if (rdnvar.definitions.BPMNDiagram[0].BPMNPlane[0].BPMNShape !== undefined) {
         rdnvar.definitions.BPMNDiagram[0].BPMNPlane[0].BPMNShape.forEach(shape => {
-          let notation = new Notation();
+          const notation = new Notation();
           notation.bpmNotationCode = shape.$.bpmnElement;
           this.diagramNot.push(notation);
         });
@@ -206,25 +229,24 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
   initializeForm() {
     this.mainform = this.formBuilder.group({
+      bpm_notation_code: [''],
       resource: [''],
-      compound: this.formBuilder.group({
+      compound_attributes: this.formBuilder.group({
         name: ['']
       }),
-      canHandle: this.formBuilder.group({
+      can_handle_attributes: this.formBuilder.group({
         time: [''],
-        quantity: [''],
-        resource: this.formBuilder.group({
-          name: [''],
-        })
+        quantity: [''] // ,
+        // resource: this.formBuilder.group({
+        //   name: [''],
+        // })
       }),
-      canProduce: this.formBuilder.group({
+      can_produce_attributes: this.formBuilder.group({
         time: [''],
-        quantity: [''],
-        resource: this.formBuilder.group({
-          name: [''],
-        })
+        quantity: ['']
       }),
       isConstraint: false,
+      diagram_id: []
     });
     // dependencies: Notation;
   }
