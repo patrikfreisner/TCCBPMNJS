@@ -33,7 +33,7 @@ export class BPMDevelopmentMenuComponent implements OnInit {
     const dg = new Diagram();
     dg.bpm_diagram_code = INIT_XML;
 
-    this.genericDataService.createObject('http://192.168.56.102:3000/diagrams', dg).subscribe(
+    this.genericDataService.createObject('diagrams', dg).subscribe(
       (data) => {
         console.log('Consegui criar!');
         this.router.navigate(['/menu/create'], {state: {diagramId: data.id}});

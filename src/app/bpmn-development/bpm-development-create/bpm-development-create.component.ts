@@ -9,13 +9,12 @@ import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.development.js'; // Habilita 
 // import * as Viewer from 'bpmn-js/dist/bpmn-viewer.development.js'; // Apenas para visualização
 import * as $ from 'jquery';
 import * as xml2js from 'xml2js';
-import {Observable} from 'rxjs';
-import {ModalService} from '../../Service/modal.service';
-import {Diagram} from 'src/app/Models/diagram';
-import {FormBuilder} from '@angular/forms';
-import {Notation} from 'src/app/Models/notation';
-import {GenericDataServiceService} from '../../Service/generic-data-service.service';
-import {Router} from '@angular/router';
+import { ModalService } from '../../Service/modal.service';
+import { Diagram } from 'src/app/Models/diagram';
+import { FormBuilder } from '@angular/forms';
+import { Notation } from 'src/app/Models/notation';
+import { GenericDataServiceService } from '../../Service/generic-data-service.service';
+import { Router } from '@angular/router';
 
 const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
   <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
@@ -36,7 +35,7 @@ const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestroy {
   thisDiagramId = history.state.diagramId;
-  title = 'Angular/BPMN';
+  title = 'GO-pn | Criar diagrama';
   modeler = new BpmnJS();
   diagramNot = new Array();
   notationProperties: any;
@@ -51,17 +50,15 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   ) {
   }
 
-
-  onSubmit() {
-    // TODO: Use EventEmitter with form value
-    console.warn(this.mainform.value);
-  }
-
+  // If there is no erros can be removed!
+  // onSubmit() {
+  //   // TODO: Use EventEmitter with form value
+  //   console.warn(this.mainform.value);
+  // }
 
   ngAfterContentInit(): void {
     if (this.thisDiagramId === undefined) {
-      // TODO
-      this.genericDataService.getObjects('http://192.168.56.102:3000/diagrams').subscribe(
+      this.genericDataService.getObjects('diagrams').subscribe(
         (diagrams: any[]) => {
           const diagram = diagrams[diagrams.length - 1];
           this.thisDiagramId = diagrams[diagrams.length - 1].id;
@@ -69,13 +66,13 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
           this.modeler.importXML(diagram.bpm_diagram_code);
           $('.bjs-powered-by').css('display', 'none');
         },
-        () => {
-          alert('An error ocurred when initializing XML');
+        (err) => {
+          alert('An error ocurred when initializing XML. Err: ' + err);
           this.router.navigate(['/menu']);
         }
       );
     } else {
-      this.genericDataService.getObjectById('http://192.168.56.102:3000/diagrams', this.thisDiagramId).subscribe(
+      this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
         (diagram) => {
           this.modeler.attachTo($('#js-canvas'));
           console.log(diagram.bpm_diagram_code);
@@ -83,7 +80,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
           $('.bjs-powered-by').css('display', 'none');
         },
         (err) => {
-          alert('An error ocurred!');
+          alert('An error ocurred! Err: ' + err);
           this.router.navigate(['/menu']);
         }
       );
@@ -130,20 +127,16 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     this.modalService.open(content);
   }
 
-  ngOnDestroy(): void {
-    this.modeler.destroy();
-  }
-
-
-  changeColorXML(NOTATION_ID) {
-    const elementRegistry = this.modeler.get('elementRegistry');
-    const modeling = this.modeler.get('modeling');
-    const shape = elementRegistry.get(NOTATION_ID);
-    modeling.setColor(shape, {
-      stroke: 'red',
-      fill: 'white'
-    });
-  }
+  // Probably we're going to use it at otimization
+  // changeColorXML(NOTATION_ID) {
+  //   const elementRegistry = this.modeler.get('elementRegistry');
+  //   const modeling = this.modeler.get('modeling');
+  //   const shape = elementRegistry.get(NOTATION_ID);
+  //   modeling.setColor(shape, {
+  //     stroke: 'red',
+  //     fill: 'white'
+  //   });
+  // }
 
 
   deleteMe(variable: any) {
@@ -163,7 +156,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
     console.warn(dataToSend);
 
-    this.genericDataService.createObject('http://192.168.56.102:3000/notations', dataToSend).subscribe(
+    this.genericDataService.createObject('notations', dataToSend).subscribe(
       (data) => {
         alert('Salvo!');
         this.saveXML();
@@ -180,14 +173,14 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     const dg = new Diagram();
     dg.id = this.thisDiagramId;
     dg.bpm_diagram_code = '';
-    this.modeler.saveXML({format: true}, (err, CHANGED_XML) => {
+    this.modeler.saveXML({ format: true }, (err, CHANGED_XML) => {
       const stripNS = xml2js.processors.stripPrefix;
       dg.bpm_diagram_code = CHANGED_XML.toString();
     });
     dg.notation = this.diagramNot;
     console.warn(dg);
 
-    this.genericDataService.updateObject('http://192.168.56.102:3000/diagrams', dg).subscribe(
+    this.genericDataService.updateObject('diagrams', dg).subscribe(
       (data) => {
         alert('Salvo!');
       },
@@ -209,11 +202,11 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   getCurrentXML() {
     // Avoid duplicated shapes
     this.diagramNot = [];
-    //
-    this.modeler.saveXML({format: true}, (err, CHANGE_XML) => {
+    
+    this.modeler.saveXML({ format: true }, (err, CHANGE_XML) => {
       const stripNS = xml2js.processors.stripPrefix;
       let rdnvar: any;
-      xml2js.parseString(CHANGE_XML, {tagNameProcessors: [stripNS]}, (ERR, result) => {
+      xml2js.parseString(CHANGE_XML, { tagNameProcessors: [stripNS] }, (ERR, result) => {
         rdnvar = result;
       });
       // Check if variable contains any shape

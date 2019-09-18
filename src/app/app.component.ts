@@ -6,5 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'TCCBPMNJS';
+  // Gestão e otimização de processos de negocio!
+  title = 'GO-Pn :)';
 }
