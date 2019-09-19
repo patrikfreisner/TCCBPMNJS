@@ -25,12 +25,13 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   thisDiagramId: any;
   diagram: any;
   title = 'GO-pn | Criar diagrama';
-  // modeler = new BpmnJS();
-  modeler = new Viewer();
+  modeler = new BpmnJS();
+  // modeler = new Viewer();
   diagramNot = new Array();
   notationProperties: any;
   mainform: any;
   modelerStr = 'viewer';
+  editEnable = false;
 
 
   constructor(
@@ -80,17 +81,23 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   }
 
   changeModeler(): void {
-    if (this.modelerStr === 'viewer') {
-      this.modeler.destroy();
-      this.modeler = new BpmnJS();
-      this.initializeBPMDiagramModeler();
-      this.modelerStr = 'modeler';
-    } else if (this.modelerStr === 'modeler') {
-      this.modeler.destroy();
-      this.modeler = new Viewer();
-      this.initializeBPMDiagramModeler();
-      this.modelerStr = 'viewer';
+    if (this.editEnable) {
+      this.editEnable = false;
+
+    } else {
+      this.editEnable = true;
     }
+    // if (this.modelerStr === 'viewer') {
+    //   this.modeler.destroy();
+    //   this.modeler = new BpmnJS();
+    //   this.initializeBPMDiagramModeler();
+    //   this.modelerStr = 'modeler';
+    // } else if (this.modelerStr === 'modeler') {
+    //   this.modeler.destroy();
+    //   this.modeler = new Viewer();
+    //   this.initializeBPMDiagramModeler();
+    //   this.modelerStr = 'viewer';
+    // }
   }
 
   openPropertiesContent(content, notationId) {
@@ -237,6 +244,13 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
       diagram_id: []
     });
     // dependencies: Notation;
+
+
+    if (this.editEnable) {
+      this.mainform.enable();
+    } else {
+      this.mainform.disable();
+    }
   }
 
   setNotationName(value: string) {

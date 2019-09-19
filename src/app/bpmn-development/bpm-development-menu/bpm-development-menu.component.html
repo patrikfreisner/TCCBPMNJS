@@ -69,13 +69,30 @@
           </td>
           <td>{{ dateParser(diagram.updated_at) }}</td>
           <td><button (click)="viewDiagram(diagram.id); modal.close('Close click')" class="btn btn-default btn-outline-dark"> Abrir diagrama! </button></td>
-          <td><button (click)="deleteDiagram(diagram.id); modal.close('Close click')" class="btn btn-default btn-outline-dark"> Deletar! </button></td>
+          <td><button (click)="this.modalService.open(deleteModalContent); this.selectIdModel = diagram.id; modal.close('Close click')" class="btn btn-default btn-outline-danger"> Deletar! </button></td>
         </tr>
         </tbody>
       </table>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Fechar</button>
+  </div>
+</ng-template>
+
+<ng-template #deleteModalContent let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Você tem certeza?</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <h4>Você esta prestes a deletar um diagrama!</h4>
+    <h5>Deseja realmente fazer isso?</h5>
+  </div>
+  <div class="modal-footer" style="margin: 15px;">
+    <button type="button" class="btn btn-outline-danger" (click)="deleteDiagram(this.selectIdModel);modal.close('Close click')">Sim</button>
+    <button type="button" class="btn btn-primary col-sm-10" (click)="modal.close('Close click')">NÃO!</button>
   </div>
 </ng-template>

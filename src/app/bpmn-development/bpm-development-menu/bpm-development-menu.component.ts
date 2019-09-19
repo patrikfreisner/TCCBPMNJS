@@ -26,6 +26,7 @@ export class BPMDevelopmentMenuComponent implements OnInit {
 
   mainform: any;
   diagramList: any;
+  selectIdModel: number;
 
   constructor(
     private router: Router,

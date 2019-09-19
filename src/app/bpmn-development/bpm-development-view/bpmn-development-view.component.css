@@ -49,3 +49,15 @@ hr.vertical-rule {
 #formContainer * label {
   width: 100%;
 }
+
+.diagram-backdrop {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 81.6%;
+  height: 91vh;
+  z-index: 2;
+}
+
+.disabledBackdrop {
+  display: none;
+}
