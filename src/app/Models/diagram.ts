@@ -2,9 +2,10 @@ import {Notation} from './notation';
 
 export class Diagram {
   id?: number;
-  // Uncomment this when create field at Rails
-  // name: string;
+  name: string;
   bpm_diagram_code: string;
   constraintLimit: number;
+  updated_at: string;
+  created_at: string;
   notation: Notation[];
 }

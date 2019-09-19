@@ -2,11 +2,80 @@
   <h1 align="center" class="display-3"> Menu </h1>
 
   <div class="col-sm-6 jumbotron" style="margin-left: auto; margin-right: auto;">
-    <a class="col-sm-12 btn btn-default btn-outline-dark" (click)="createNewDiagram()"> Novo Diagrama!</a>
+    <a class="col-sm-12 btn btn-default btn-outline-dark" (click)="openCreateDiagram(contentCreateView)"> Novo
+      Diagrama!</a>
     <hr>
-    <button class="col-sm-12 btn btn-default btn-outline-dark" routerLink="/menu/view"> Abrir diagrama!</button>
+    <button class="col-sm-12 btn btn-default btn-outline-dark" (click)="openViewDiagram(contentViewDiagram)"> Abrir
+      diagrama!
+    </button>
     <hr>
-    <button class="col-sm-12 btn btn-default btn-outline-dark" routerLink="/menu/toc"> Processos de otimização TOC!</button>
+    <button class="col-sm-12 btn btn-default btn-outline-dark" routerLink="/menu/toc"> Processos de otimização TOC!
+    </button>
   </div>
 
 </div>
+
+<ng-template #contentCreateView let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title"> Criar novo diagrama: </h4>
+    <button (click)="d('Cross click')" aria-label="Close" class="close" type="button">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <form [formGroup]="mainform">
+      <div id="formContainer">
+        <div class="col-sm-12">
+          <label>
+            Selecione o nome:
+            <input class="form-control" formControlName="name" type="text">
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button (click)="createNewDiagram(); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark"
+            type="button"> Criar diagrama!
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #contentViewDiagram let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Selecione o diagrama:</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div>
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nome</th>
+          <th scope="col">Ultima modificação</th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let diagram of diagramList">
+          <th scope="row">{{ diagram.id }}</th>
+          <td>
+            {{ diagram.name }}
+          </td>
+          <td>{{ dateParser(diagram.updated_at) }}</td>
+          <td><button (click)="viewDiagram(diagram.id); modal.close('Close click')" class="btn btn-default btn-outline-dark"> Abrir diagrama! </button></td>
+          <td><button (click)="deleteDiagram(diagram.id); modal.close('Close click')" class="btn btn-default btn-outline-dark"> Deletar! </button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+  </div>
+</ng-template>

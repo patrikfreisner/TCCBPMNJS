@@ -15,6 +15,7 @@ import { BPMNDevelopmentComponent } from './bpmn-development/bpmn-development.co
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BPMDevelopmentMenuComponent } from './bpmn-development/bpm-development-menu/bpm-development-menu.component';
 import { BpmDevelopmentCreateComponent } from './bpmn-development/bpm-development-create/bpm-development-create.component';
+import { BpmnDevelopmentViewComponent } from './bpmn-development/bpm-development-view/bpmn-development-view.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: '/menu', pathMatch: 'full' },
@@ -22,7 +23,8 @@ const appRoutes: Routes = [
     path: 'menu', component: BPMNDevelopmentComponent,
     children: [
       { path: '', component: BPMDevelopmentMenuComponent },
-      { path: 'create', component: BpmDevelopmentCreateComponent }
+      { path: 'create/:id', component: BpmDevelopmentCreateComponent },
+      { path: 'view/:id', component: BpmnDevelopmentViewComponent }
     ],
   }
 ];
@@ -33,6 +35,7 @@ const appRoutes: Routes = [
     BPMNDevelopmentComponent,
     BPMDevelopmentMenuComponent,
     BpmDevelopmentCreateComponent,
+    BpmnDevelopmentViewComponent,
   ],
   imports: [
     BrowserModule,

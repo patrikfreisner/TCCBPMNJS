@@ -6,7 +6,7 @@ import {
 
 import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.development.js'; // Habilita a opção de modelar
 
-// import * as Viewer from 'bpmn-js/dist/bpmn-viewer.development.js'; // Apenas para visualização
+import * as Viewer from 'bpmn-js/dist/bpmn-viewer.development.js'; // Apenas para visualização
 import * as $ from 'jquery';
 import * as xml2js from 'xml2js';
 import {ModalService} from '../../Service/modal.service';
@@ -16,31 +16,21 @@ import {Notation} from 'src/app/Models/notation';
 import {GenericDataServiceService} from '../../Service/generic-data-service.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
-const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
-  <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
-    <bpmn2:process id="Process_1" isExecutable="false">
-    </bpmn2:process>
-    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-      <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-      </bpmndi:BPMNPlane>
-    </bpmndi:BPMNDiagram>
-  </bpmn2:definitions>`;
-
-
 @Component({
-  selector: 'app-bpm-development-create',
-  templateUrl: './bpm-development-create.component.html',
-  styleUrls: ['./bpm-development-create.component.css'],
+  selector: 'app-bpmn-development-view',
+  templateUrl: './bpmn-development-view.component.html',
+  styleUrls: ['./bpmn-development-view.component.css']
 })
-
-export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestroy {
+export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy {
   thisDiagramId: any;
-  diagramName = '';
+  diagram: any;
   title = 'GO-pn | Criar diagrama';
-  modeler = new BpmnJS();
+  // modeler = new BpmnJS();
+  modeler = new Viewer();
   diagramNot = new Array();
   notationProperties: any;
   mainform: any;
+  modelerStr = 'viewer';
 
 
   constructor(
@@ -52,22 +42,13 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   ) {
   }
 
-  // If there is no erros can be removed!
-  // onSubmit() {
-  //   // TODO: Use EventEmitter with form value
-  //   console.warn(this.mainform.value);
-  // }
-
   ngAfterContentInit(): void {
     this.route.params.subscribe(params => {
       this.thisDiagramId = params['id'];
       this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
         (diagram) => {
-          this.modeler.attachTo($('#js-canvas'));
-          console.log(diagram.bpm_diagram_code);
-          this.diagramName = diagram.name;
-          this.modeler.importXML(diagram.bpm_diagram_code);
-          $('.bjs-powered-by').css('display', 'none');
+          this.diagram = diagram;
+          this.initializeBPMDiagramModeler();
         },
         (err) => {
           alert('An error ocurred! Err: ' + err);
@@ -96,6 +77,20 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
   ngOnDestroy(): void {
     this.modeler.destroy();
+  }
+
+  changeModeler(): void {
+    if (this.modelerStr === 'viewer') {
+      this.modeler.destroy();
+      this.modeler = new BpmnJS();
+      this.initializeBPMDiagramModeler();
+      this.modelerStr = 'modeler';
+    } else if (this.modelerStr === 'modeler') {
+      this.modeler.destroy();
+      this.modeler = new Viewer();
+      this.initializeBPMDiagramModeler();
+      this.modelerStr = 'viewer';
+    }
   }
 
   openPropertiesContent(content, notationId) {
@@ -211,6 +206,13 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
         });
       }
     });
+  }
+
+  initializeBPMDiagramModeler(): void {
+    this.modeler.attachTo($('#js-canvas'));
+    console.log(this.diagram.bpm_diagram_code);
+    this.modeler.importXML(this.diagram.bpm_diagram_code);
+    $('.bjs-powered-by').css('display', 'none');
   }
 
   initializeForm() {

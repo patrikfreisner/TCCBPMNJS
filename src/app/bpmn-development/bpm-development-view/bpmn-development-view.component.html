@@ -1,7 +1,7 @@
 <div class="myContainer">
   <div class="sidebar">
     <div id="sidebar-head">
-      <h5 style="margin: 10px;" align="center"> {{diagramName}} </h5>
+      <h5 style="margin: 10px;" align="center"> {{diagram.name}} </h5>
     </div>
     <div id="sidebar-body">
       <div *ngFor="let obj of diagramNot" class="card" style="margin-bottom: 10px;">
@@ -24,6 +24,7 @@
   <!-- BPMN-JS render space bellow :)-->
   <div id="js-canvas">
     <button (click)="saveXML()" class="btn btn-default btn-outline-dark" style="z-index: 1; position: absolute; top: 55px; right: 10px;">Salvar</button>
+    <button (click)="changeModeler()" class="btn btn-default btn-outline-dark" style="z-index: 1; position: absolute; top: 95px; right: 10px;">Editar</button>
   </div>
 </div>
 
