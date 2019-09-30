@@ -3,6 +3,7 @@ import {Information} from './information';
 import {Diagram} from './diagram';
 
 export class Notation {
+  id: number;
   name: string;
   resource: string;
   compound: Compounds;
@@ -10,5 +11,5 @@ export class Notation {
   canProduce: Information;
   isConstraint: boolean;
   bpmNotationCode: string;
-  dependencies: Notation;
+  related_notation: Notation[];
 }

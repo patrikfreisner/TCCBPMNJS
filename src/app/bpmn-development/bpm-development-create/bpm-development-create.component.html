@@ -1,7 +1,7 @@
 <div class="myContainer">
   <div class="sidebar">
     <div id="sidebar-head">
-      <h5 style="margin: 10px;" align="center"> {{diagramName}} </h5>
+      <h5 style="margin: 10px;" align="center"> {{diagram.name}} </h5>
     </div>
     <div id="sidebar-body">
       <div *ngFor="let obj of diagramNot" class="card" style="margin-bottom: 10px;">
@@ -23,7 +23,9 @@
 
   <!-- BPMN-JS render space bellow :)-->
   <div id="js-canvas">
-    <button (click)="saveXML()" class="btn btn-default btn-outline-dark" style="z-index: 1; position: absolute; top: 55px; right: 10px;">Salvar</button>
+    <button (click)="saveXML()" class="btn btn-default btn-outline-dark"
+            style="z-index: 1; position: absolute; top: 55px; right: 10px;">Salvar
+    </button>
   </div>
 </div>
 
@@ -50,7 +52,7 @@
 
     <form [formGroup]="mainform" id="notationForm">
       <div id="formContainer">
-        <h4 align="center"> Notation Properties </h4>
+        <h4 align="center"> Propriedade das Notações </h4>
         <!--        <div class="col-sm-12">-->
         <!--          <label>-->
         <!--            Resource:-->
@@ -60,7 +62,7 @@
         <div class="nestedFormContainer" formGroupName="compound_attributes">
           <div class="col-sm-12">
             <label>
-              Compound name:
+              Composição do processo:
               <input class="form-control" formControlName="name" type="text">
             </label>
           </div>
@@ -68,13 +70,15 @@
         <div class="nestedFormContainer" formGroupName="can_handle_attributes">
           <div class="col-sm-6">
             <label>
-              CanHandle Time:
+              <span data-toggle="tooltip" data-placement="top"
+                    title="Tempo maximo para que a quantidade especificada ao lado fique pronta.">Tempo maximo de produção: </span>
               <input class="form-control" formControlName="time" type="text">
             </label>
           </div>
           <div class="col-sm-6">
             <label>
-              CanHandle Quantity:
+              <span data-toggle="tooltip" data-placement="top"
+                    title="Quantidade maxima de peças que a maquina suporta produzir, geralmente especificada pelo fabricante.">Quantidade maxima de peças:</span>
               <input class="form-control" formControlName="quantity" type="text">
             </label>
           </div>
@@ -82,13 +86,13 @@
         <div class="nestedFormContainer" formGroupName="can_produce_attributes">
           <div class="col-sm-6">
             <label>
-              CanProduce Time:
+              Tempo de produção atual:
               <input class="form-control" formControlName="time" type="text">
             </label>
           </div>
           <div class="col-sm-6">
             <label>
-              CanProduce Quantity:
+              Quantidade produzida atualmente:
               <input class="form-control" formControlName="quantity" type="text">
             </label>
           </div>
@@ -97,6 +101,8 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button (click)="saveNotation(); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark" type="button">Save</button>
+    <button (click)="saveNotation(setNotationName(notationProperties.businessObject.di.id)); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark"
+            type="button"> Salvar!
+    </button>
   </div>
 </ng-template>

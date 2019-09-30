@@ -1,20 +1,20 @@
 import {
   Component,
   AfterContentInit,
-  OnDestroy
+  OnDestroy, OnInit
 } from '@angular/core';
 
 import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.development.js'; // Habilita a opção de modelar
 
-import * as Viewer from 'bpmn-js/dist/bpmn-viewer.development.js'; // Apenas para visualização
+// import * as Viewer from 'bpmn-js/dist/bpmn-viewer.development.js'; // Apenas para visualização
 import * as $ from 'jquery';
 import * as xml2js from 'xml2js';
-import {ModalService} from '../../Service/modal.service';
 import {Diagram} from 'src/app/Models/diagram';
 import {FormBuilder} from '@angular/forms';
 import {Notation} from 'src/app/Models/notation';
 import {GenericDataServiceService} from '../../Service/generic-data-service.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-bpmn-development-view',
@@ -32,16 +32,19 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   mainform: any;
   modelerStr = 'viewer';
   editEnable = false;
-
+  dropdownList = [];
+  selectedList = [];
+  dropdownSettings = {};
 
   constructor(
-    private modalService: ModalService,
+    private modalService: NgbModal,
     private formBuilder: FormBuilder,
     private genericDataService: GenericDataServiceService,
     private router: Router,
     private route: ActivatedRoute
   ) {
   }
+
 
   ngAfterContentInit(): void {
     this.route.params.subscribe(params => {
@@ -101,6 +104,20 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   }
 
   openPropertiesContent(content, notationId) {
+    this.dropdownList = [];
+    this.selectedList = [];
+
+    this.dropdownSettings = {
+      singleSelection: false,
+      idField: 'id',
+      textField: 'name',
+      selectAllText: 'Select All',
+      unSelectAllText: 'UnSelect All',
+      itemsShowLimit: 3,
+      allowSearchFilter: true,
+      disable: this.editEnable
+    };
+
     this.notationProperties = this.getNotationInfo(notationId);
     this.initializeForm();
 
@@ -108,19 +125,36 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
       (notation) => {
         const nt = notation[notation.length - 1];
         this.mainform.patchValue(nt);
+        this.mainform.get('id').setValue(nt.id);
         this.mainform.get('compound_attributes.name').setValue(nt.compound.name);
         this.mainform.get('can_handle_attributes.quantity').setValue(nt.can_handle.quantity);
         this.mainform.get('can_handle_attributes.time').setValue(nt.can_handle.time);
         this.mainform.get('can_produce_attributes.quantity').setValue(nt.can_produce.quantity);
         this.mainform.get('can_produce_attributes.time').setValue(nt.can_produce.time);
-        console.log(this.mainform.value);
-      },
-      (err) => {
-        console.error(err);
+        for (const notate of notation[notation.length - 1].related_notation) {
+          const genericData1: any = {};
+          genericData1.id = notate.id;
+          genericData1.name = this.getNotationInfo(notate.bpm_notation_code).businessObject.name.toString();
+          this.selectedList.push(genericData1);
+        }
+
+        this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
+          (data) => {
+            for (const note of data.notation) {
+              if (note.id !== notation[notation.length - 1].id) {
+                const genericData1: any = {};
+                genericData1.id = note.id;
+                genericData1.name = this.getNotationInfo(note.bpm_notation_code).businessObject.name.toString();
+                this.dropdownList.push(genericData1);
+              }
+            }
+          }
+        );
       }
     );
-
-    this.modalService.open(content);
+    setTimeout(() => {
+      this.modalService.open(content, {size: 'lg'});
+    }, 350);
   }
 
   // Probably we're going to use it at otimization
@@ -140,25 +174,64 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     const element = elementRegistry.get(variable);
     const modeling = this.modeler.get('modeling');
     modeling.removeShape(element);
+
+    this.genericDataService.searchByNotationCode(variable + '_di').subscribe(
+      (data) => {
+        this.genericDataService.deleteObject('notations', data[0].id).subscribe(
+          () => {
+            this.saveXML();
+          },
+          (err) => {
+            console.log('Didn\'t worked! Err: \n');
+            console.log(err);
+          }
+        );
+      },
+      () => {
+        this.saveXML();
+      }
+    );
+
     this.getCurrentXML();
   }
 
-  saveNotation() {
-    let dataToSend: any = null;
+  saveNotation(notationId) {
+    let dataId = [];
+    this.selectedList.forEach((data) => {
+      dataId.push(data.id);
+    });
+
+    let dataToSend: any;
     dataToSend = this.mainform.value;
     dataToSend.bpm_notation_code = this.notationProperties.businessObject.di.id;
     dataToSend.resource = this.setNotationName(this.notationProperties.businessObject.$type);
     dataToSend.diagram_id = this.thisDiagramId;
+    dataToSend.related_notation = this.selectedList;
 
-    console.warn(dataToSend);
+    console.log(dataToSend);
 
-    this.genericDataService.createObject('notations', dataToSend).subscribe(
-      (data) => {
-        this.saveXML();
+    this.genericDataService.searchByNotationCode(notationId.toString()).subscribe(
+      () => {
+        this.genericDataService.updateObject('notations', dataToSend).subscribe(
+          () => {
+            this.saveXML();
+          },
+          (err) => {
+            console.log('Didn\'t worked! Err: \n');
+            console.log(err);
+          }
+        );
       },
-      (err) => {
-        console.log('Didn\'t worked! Err: \n');
-        console.log(err);
+      () => {
+        this.genericDataService.createObject('notations', dataToSend).subscribe(
+          () => {
+            this.saveXML();
+          },
+          (err) => {
+            console.log('Didn\'t worked! Err: \n');
+            console.log(err);
+          }
+        );
       }
     );
   }
@@ -188,6 +261,9 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
 
 
   getNotationInfo(notationId: any) {
+    if (notationId.includes('_di')) {
+      notationId = notationId.replace('_di', '');
+    }
     const elementRegistry = this.modeler.get('elementRegistry');
     const element = elementRegistry.get(notationId);
     return element;
@@ -224,6 +300,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
 
   initializeForm() {
     this.mainform = this.formBuilder.group({
+      id: [''],
       bpm_notation_code: [''],
       resource: [''],
       compound_attributes: this.formBuilder.group({
@@ -241,9 +318,9 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
         quantity: ['']
       }),
       isConstraint: false,
-      diagram_id: []
+      dependencies: [],
+      diagram_id: [],
     });
-    // dependencies: Notation;
 
 
     if (this.editEnable) {
@@ -251,6 +328,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     } else {
       this.mainform.disable();
     }
+
   }
 
   setNotationName(value: string) {

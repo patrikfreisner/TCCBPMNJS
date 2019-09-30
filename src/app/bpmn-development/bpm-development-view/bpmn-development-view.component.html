@@ -49,14 +49,14 @@
         <input class="form-control" disabled type="text" value="{{notationProperties.businessObject.di.id}}">
       </div>
       <div class="col-sm-6">
-        <label> Display_Name: </label>
+        <label> Nome: </label>
         <input class="form-control" disabled type="text" value="{{notationProperties.businessObject.name || 'N/A'}}">
       </div>
     </div>
 
     <form [formGroup]="mainform" id="notationForm">
       <div id="formContainer">
-        <h4 align="center"> Notation Properties </h4>
+        <h4 align="center"> Propriedade das Notações </h4>
         <!--        <div class="col-sm-12">-->
         <!--          <label>-->
         <!--            Resource:-->
@@ -66,7 +66,7 @@
         <div class="nestedFormContainer" formGroupName="compound_attributes">
           <div class="col-sm-12">
             <label>
-              Compound name:
+              Composição do processo:
               <input class="form-control" formControlName="name" type="text">
             </label>
           </div>
@@ -74,13 +74,15 @@
         <div class="nestedFormContainer" formGroupName="can_handle_attributes">
           <div class="col-sm-6">
             <label>
-              CanHandle Time:
+              <span data-toggle="tooltip" data-placement="top"
+                    title="Tempo maximo para que a quantidade especificada ao lado fique pronta.">Tempo maximo de produção: </span>
               <input class="form-control" formControlName="time" type="text">
             </label>
           </div>
           <div class="col-sm-6">
             <label>
-              CanHandle Quantity:
+              <span data-toggle="tooltip" data-placement="top"
+                    title="Quantidade maxima de peças que a maquina suporta produzir, geralmente especificada pelo fabricante.">Quantidade maxima de peças:</span>
               <input class="form-control" formControlName="quantity" type="text">
             </label>
           </div>
@@ -88,23 +90,36 @@
         <div class="nestedFormContainer" formGroupName="can_produce_attributes">
           <div class="col-sm-6">
             <label>
-              CanProduce Time:
+              Tempo de produção atual:
               <input class="form-control" formControlName="time" type="text">
             </label>
           </div>
           <div class="col-sm-6">
             <label>
-              CanProduce Quantity:
+              Quantidade produzida atualmente:
               <input class="form-control" formControlName="quantity" type="text">
             </label>
           </div>
         </div>
       </div>
     </form>
+    <div class="nestedFormContainer">
+      <div class="col-sm-12">
+        <!--            <label class="my-1 mr-2" for="inlineFormCustomSelectPref">Dependencias</label>-->
+        <!--            <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" formControlName="dependencies">-->
+        <!--              <option value="1">Hallo</option>-->
+        <!--            </select>-->
+        <ng-multiselect-dropdown
+          [data]="dropdownList"
+          [(ngModel)]="selectedList"
+          [settings]="dropdownSettings">
+        </ng-multiselect-dropdown>
+      </div>
+    </div>
   </div>
   <div class="modal-footer">
-    <button (click)="saveNotation(); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark"
-            type="button">Save
+    <button (click)="saveNotation(setNotationName(notationProperties.businessObject.di.id)); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark"
+            type="button"> Salvar!
     </button>
   </div>
 </ng-template>

@@ -15,6 +15,7 @@ import {FormBuilder} from '@angular/forms';
 import {Notation} from 'src/app/Models/notation';
 import {GenericDataServiceService} from '../../Service/generic-data-service.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
   <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
@@ -35,6 +36,7 @@ const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestroy {
   thisDiagramId: any;
+  diagram: any;
   diagramName = '';
   title = 'GO-pn | Criar diagrama';
   modeler = new BpmnJS();
@@ -44,7 +46,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
 
   constructor(
-    private modalService: ModalService,
+    private modalService: NgbModal,
     private formBuilder: FormBuilder,
     private genericDataService: GenericDataServiceService,
     private router: Router,
@@ -63,11 +65,8 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       this.thisDiagramId = params['id'];
       this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
         (diagram) => {
-          this.modeler.attachTo($('#js-canvas'));
-          console.log(diagram.bpm_diagram_code);
-          this.diagramName = diagram.name;
-          this.modeler.importXML(diagram.bpm_diagram_code);
-          $('.bjs-powered-by').css('display', 'none');
+          this.diagram = diagram;
+          this.initializeBPMDiagramModeler();
         },
         (err) => {
           alert('An error ocurred! Err: ' + err);
@@ -112,13 +111,10 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
         this.mainform.get('can_produce_attributes.quantity').setValue(nt.can_produce.quantity);
         this.mainform.get('can_produce_attributes.time').setValue(nt.can_produce.time);
         console.log(this.mainform.value);
-      },
-      (err) => {
-        console.error(err);
       }
     );
 
-    this.modalService.open(content);
+    this.modalService.open(content, {size: 'lg'});
   }
 
   // Probably we're going to use it at otimization
@@ -138,25 +134,58 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     const element = elementRegistry.get(variable);
     const modeling = this.modeler.get('modeling');
     modeling.removeShape(element);
+
+    this.genericDataService.searchByNotationCode(variable + '_di').subscribe(
+      (data) => {
+        this.genericDataService.deleteObject('notations', data[0].id).subscribe(
+          () => {
+            this.saveXML();
+          },
+          (err) => {
+            console.log('Didn\'t worked! Err: \n');
+            console.log(err);
+          }
+        );
+      },
+      () => {
+        this.saveXML();
+      }
+    );
+
     this.getCurrentXML();
   }
 
-  saveNotation() {
-    let dataToSend: any = null;
+  saveNotation(notationId) {
+    let dataToSend: any;
     dataToSend = this.mainform.value;
     dataToSend.bpm_notation_code = this.notationProperties.businessObject.di.id;
     dataToSend.resource = this.setNotationName(this.notationProperties.businessObject.$type);
     dataToSend.diagram_id = this.thisDiagramId;
 
-    console.warn(dataToSend);
+    // console.warn(dataToSend);
 
-    this.genericDataService.createObject('notations', dataToSend).subscribe(
-      (data) => {
-        this.saveXML();
+    this.genericDataService.searchByNotationCode(notationId.toString()).subscribe(
+      () => {
+        this.genericDataService.updateObject('notations', dataToSend).subscribe(
+          () => {
+            this.saveXML();
+          },
+          (err) => {
+            console.log('Didn\'t worked! Err: \n');
+            console.log(err);
+          }
+        );
       },
-      (err) => {
-        console.log('Didn\'t worked! Err: \n');
-        console.log(err);
+      () => {
+        this.genericDataService.createObject('notations', dataToSend).subscribe(
+          () => {
+            this.saveXML();
+          },
+          (err) => {
+            console.log('Didn\'t worked! Err: \n');
+            console.log(err);
+          }
+        );
       }
     );
   }
@@ -186,6 +215,9 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
 
 
   getNotationInfo(notationId: any) {
+    if (notationId.includes('_di')) {
+      notationId = notationId.replace('_di', '');
+    }
     const elementRegistry = this.modeler.get('elementRegistry');
     const element = elementRegistry.get(notationId);
     return element;
@@ -213,8 +245,16 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     });
   }
 
+  initializeBPMDiagramModeler(): void {
+    this.modeler.attachTo($('#js-canvas'));
+    console.log(this.diagram.bpm_diagram_code);
+    this.modeler.importXML(this.diagram.bpm_diagram_code);
+    $('.bjs-powered-by').css('display', 'none');
+  }
+
   initializeForm() {
     this.mainform = this.formBuilder.group({
+      id: [],
       bpm_notation_code: [''],
       resource: [''],
       compound_attributes: this.formBuilder.group({
