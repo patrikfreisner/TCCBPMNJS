@@ -15,6 +15,7 @@ import {Notation} from 'src/app/Models/notation';
 import {GenericDataServiceService} from '../../Service/generic-data-service.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {of} from 'rxjs';
 
 @Component({
   selector: 'app-bpmn-development-view',
@@ -35,6 +36,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   dropdownList = [];
   selectedList = [];
   dropdownSettings = {};
+  relQuantityForWhoDependsOnMeRelated = 0;
 
   constructor(
     private modalService: NgbModal,
@@ -104,6 +106,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   }
 
   openPropertiesContent(content, notationId) {
+    alert(notationId);
     this.dropdownList = [];
     this.selectedList = [];
 
@@ -150,6 +153,18 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
             }
           }
         );
+      },
+      () => {
+        this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
+          (data) => {
+            for (const note of data.notation) {
+              const genericData1: any = {};
+              genericData1.id = note.id;
+              genericData1.name = this.getNotationInfo(note.bpm_notation_code).businessObject.name.toString();
+              this.dropdownList.push(genericData1);
+            }
+          }
+        );
       }
     );
     setTimeout(() => {
@@ -157,17 +172,107 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     }, 350);
   }
 
-  // Probably we're going to use it at otimization
-  // changeColorXML(NOTATION_ID) {
-  //   const elementRegistry = this.modeler.get('elementRegistry');
-  //   const modeling = this.modeler.get('modeling');
-  //   const shape = elementRegistry.get(NOTATION_ID);
-  //   modeling.setColor(shape, {
-  //     stroke: 'red',
-  //     fill: 'white'
-  //   });
-  // }
+  changeColorXML(NOTATION_ID, color) {
+    const elementRegistry = this.modeler.get('elementRegistry');
+    const modeling = this.modeler.get('modeling');
+    const shape = elementRegistry.get(NOTATION_ID);
+    modeling.setColor(shape, {
+      stroke: color,
+      fill: 'white'
+    });
+  }
 
+  optimizingProcess(): void {
+    const notationsID = new Array();
+    this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
+      (diagram) => {
+        for (const notation of diagram.notation) {
+          notationsID.push(notation.id);
+        }
+        // Para cada notation pega dados do DB
+        for (const id of notationsID) {
+          this.genericDataService.getObjectById('notations', id).subscribe(
+            (notation) => {
+              const thisAllItems = notation.can_produce.quantity / notation.can_produce.time;
+              const thisMaxItems = notation.can_handle.quantity / notation.can_handle.time;
+
+              ///////////////////// INICIO /////////////////
+              // Mais de uma notation depende dele?
+              if (notation.inverse_related_notation.length > 1) {
+                const allRelatedNotation = notation.inverse_related_notation;
+                let allNeededItems = 0;
+                let allNonNeededItems = 0;
+
+                for (const whoDependsOnMe of allRelatedNotation) {
+                  // Aqui já deve sair as peças por minuto
+                  if (whoDependsOnMe.related_notation.length === 1 && whoDependsOnMe.related_notation.length !== 0) {
+                    allNeededItems += whoDependsOnMe.can_produce.quantity / whoDependsOnMe.can_produce.time;
+                  } else if (whoDependsOnMe.related_notation.length !== 0) {
+                    for (const rel of whoDependsOnMe.related_notation) {
+                      if (rel.id !== notation.id) {
+                        allNonNeededItems += rel.can_produce.quantity / rel.can_produce.time;
+                      } else {
+                        allNonNeededItems += 0;
+                      }
+                    }
+                    allNeededItems = whoDependsOnMe.can_produce.quantity / whoDependsOnMe.can_produce.time;
+                    allNeededItems = allNeededItems - allNonNeededItems;
+                  }
+                  // Ja considera caso a dependencia e dependencia de mais alguem.
+                }
+
+                if (thisAllItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                  this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+                } else {
+                  if (thisMaxItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), '#ff9900');
+                  } else {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'red');
+                  }
+                }
+                // Apenas uma notation depende dele!
+              } else if (notation.inverse_related_notation.length === 1) {
+
+                const whoDependsOnMe = notation.inverse_related_notation[0];
+
+                const thisOneItems = notation.can_produce.quantity / notation.can_produce.time;
+                const thisOneMaxItems = notation.can_handle.quantity / notation.can_handle.time;
+                let allNeededItems = 0;
+
+                if (whoDependsOnMe.related_notation.length === 1 && whoDependsOnMe.related_notation.length !== 0) {
+                  allNeededItems += whoDependsOnMe.can_produce.quantity / whoDependsOnMe.can_produce.time;
+                } else if (whoDependsOnMe.related_notation.length !== 0) {
+                  let allNonNeededItems = 0;
+                  for (const rel of whoDependsOnMe.related_notation) {
+                    if (rel.id !== notation.id) {
+                      allNonNeededItems += rel.can_produce.quantity / rel.can_produce.time;
+                    } else {
+                      allNonNeededItems += 0;
+                    }
+                  }
+                  allNeededItems = whoDependsOnMe.can_produce.quantity / whoDependsOnMe.can_produce.time;
+                  allNeededItems = allNeededItems - allNonNeededItems;
+                }
+                if (thisOneItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                  this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+                } else {
+                  if (thisOneMaxItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), '#ff9900');
+                  } else {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'red');
+                  }
+                }
+              } else if (notation.inverse_related_notation.length === 0 && notation.bpm_notation_code.search('/EndEvent/gi')
+                || notation.bpm_notation_code.search('/StartEvent/gi')) {
+                this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+              }
+              ////////////////////////////////// FIM ////////////////
+            }
+          );
+        }
+      }
+    );
+  }
 
   deleteMe(variable: any) {
     const elementRegistry = this.modeler.get('elementRegistry');
@@ -196,10 +301,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   }
 
   saveNotation(notationId) {
-    let dataId = [];
-    this.selectedList.forEach((data) => {
-      dataId.push(data.id);
-    });
 
     let dataToSend: any;
     dataToSend = this.mainform.value;
@@ -208,10 +309,11 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     dataToSend.diagram_id = this.thisDiagramId;
     dataToSend.related_notation = this.selectedList;
 
-    console.log(dataToSend);
-
     this.genericDataService.searchByNotationCode(notationId.toString()).subscribe(
-      () => {
+      (data) => {
+        dataToSend.can_handle_attributes.id = data[0].can_handle.id;
+        dataToSend.can_produce_attributes.id = data[0].can_produce.id;
+        dataToSend.compound_attributes.id = data[0].compound.id;
         this.genericDataService.updateObject('notations', dataToSend).subscribe(
           () => {
             this.saveXML();
@@ -236,7 +338,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     );
   }
 
-
   saveXML() {
     const dg = new Diagram();
     dg.id = this.thisDiagramId;
@@ -246,7 +347,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
       dg.bpm_diagram_code = CHANGED_XML.toString();
     });
     dg.notation = this.diagramNot;
-    console.warn(dg);
 
     this.genericDataService.updateObject('diagrams', dg).subscribe(
       (data) => {
@@ -259,7 +359,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     );
   }
 
-
   getNotationInfo(notationId: any) {
     if (notationId.includes('_di')) {
       notationId = notationId.replace('_di', '');
@@ -268,7 +367,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
     const element = elementRegistry.get(notationId);
     return element;
   }
-
 
   getCurrentXML() {
     // Avoid duplicated shapes
@@ -293,7 +391,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
 
   initializeBPMDiagramModeler(): void {
     this.modeler.attachTo($('#js-canvas'));
-    console.log(this.diagram.bpm_diagram_code);
     this.modeler.importXML(this.diagram.bpm_diagram_code);
     $('.bjs-powered-by').css('display', 'none');
   }

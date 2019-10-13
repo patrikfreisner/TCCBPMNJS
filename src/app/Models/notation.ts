@@ -9,7 +9,8 @@ export class Notation {
   compound: Compounds;
   canHandle: Information;
   canProduce: Information;
-  isConstraint: boolean;
+  is_constraint: boolean;
   bpmNotationCode: string;
   related_notation: Notation[];
+  inverse_related_notation: Notation[];
 }

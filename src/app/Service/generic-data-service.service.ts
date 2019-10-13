@@ -41,7 +41,6 @@ export class GenericDataServiceService {
 
   public getObjectById(route: string, id: number): Observable<any> {
     const URL_STR = `${this.apiBasicUrl + route}/${id}`;
-    console.log(URL_STR);
     return this.http.get<any>(URL_STR).pipe(
       catchError(this.handleError)
     );
@@ -55,8 +54,8 @@ export class GenericDataServiceService {
   }
 
   public updateObject(route: string, object: any): Observable<any> {
-    return this.http.put(`${this.apiBasicUrl + route}/${object.id}`, object).pipe(
-      tap((c: any) => console.log('updateCustomer')),
+    return this.http.put(`${this.apiBasicUrl + route}/${object.id}`, object, this.httpOptions).pipe(
+      tap((c: any) => console.log('updateObject')),
       catchError(this.handleError)
     );
   }

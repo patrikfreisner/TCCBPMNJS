@@ -162,10 +162,11 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
     dataToSend.resource = this.setNotationName(this.notationProperties.businessObject.$type);
     dataToSend.diagram_id = this.thisDiagramId;
 
-    // console.warn(dataToSend);
-
     this.genericDataService.searchByNotationCode(notationId.toString()).subscribe(
-      () => {
+      (data) => {
+        dataToSend.can_handle_attributes.id = data[0].can_handle.id;
+        dataToSend.can_produce_attributes.id = data[0].can_produce.id;
+        dataToSend.compound_attributes.id = data[0].compound.id;
         this.genericDataService.updateObject('notations', dataToSend).subscribe(
           () => {
             this.saveXML();
