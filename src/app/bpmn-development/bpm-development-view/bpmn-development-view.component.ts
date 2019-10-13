@@ -221,10 +221,10 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
                   // Ja considera caso a dependencia e dependencia de mais alguem.
                 }
 
-                if (thisAllItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                if (thisAllItems.toFixed(2) >= allNeededItems.toFixed(2)) {
                   this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
                 } else {
-                  if (thisMaxItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                  if (thisMaxItems.toFixed(2) >= allNeededItems.toFixed(2)) {
                     this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), '#ff9900');
                   } else {
                     this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'red');
@@ -253,10 +253,10 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
                   allNeededItems = whoDependsOnMe.can_produce.quantity / whoDependsOnMe.can_produce.time;
                   allNeededItems = allNeededItems - allNonNeededItems;
                 }
-                if (thisOneItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                if (thisOneItems.toFixed(2) >= allNeededItems.toFixed(2)) {
                   this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
                 } else {
-                  if (thisOneMaxItems.toFixed(5) >= allNeededItems.toFixed(5)) {
+                  if (thisOneMaxItems.toFixed(2) >= allNeededItems.toFixed(2)) {
                     this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), '#ff9900');
                   } else {
                     this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'red');
