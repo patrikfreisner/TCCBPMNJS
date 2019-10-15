@@ -106,7 +106,6 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   }
 
   openPropertiesContent(content, notationId) {
-    alert(notationId);
     this.dropdownList = [];
     this.selectedList = [];
 
@@ -137,7 +136,11 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
         for (const notate of notation[notation.length - 1].related_notation) {
           const genericData1: any = {};
           genericData1.id = notate.id;
-          genericData1.name = this.getNotationInfo(notate.bpm_notation_code).businessObject.name.toString();
+          if (this.getNotationInfo(notate.bpm_notation_code).businessObject.name === undefined) {
+            genericData1.name = this.setNotationName(this.getNotationInfo(notate.bpm_notation_code).businessObject.$type);
+          } else {
+            genericData1.name = this.getNotationInfo(notate.bpm_notation_code).businessObject.name.toString();
+          }
           this.selectedList.push(genericData1);
         }
 
@@ -147,7 +150,11 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
               if (note.id !== notation[notation.length - 1].id) {
                 const genericData1: any = {};
                 genericData1.id = note.id;
-                genericData1.name = this.getNotationInfo(note.bpm_notation_code).businessObject.name.toString();
+                if (this.getNotationInfo(note.bpm_notation_code).businessObject.name === undefined) {
+                  genericData1.name = this.setNotationName(this.getNotationInfo(note.bpm_notation_code).businessObject.$type);
+                } else {
+                  genericData1.name = this.getNotationInfo(note.bpm_notation_code).businessObject.name.toString();
+                }
                 this.dropdownList.push(genericData1);
               }
             }
