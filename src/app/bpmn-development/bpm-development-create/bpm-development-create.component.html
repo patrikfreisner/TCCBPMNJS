@@ -26,6 +26,9 @@
     <button (click)="saveXML()" class="btn btn-default btn-outline-dark"
             style="z-index: 1; position: absolute; top: 55px; right: 10px;">Salvar
     </button>
+    <button (click)="goToViewConfigurations()" class="btn btn-default btn-outline-dark"
+            style="z-index: 1; position: absolute; top: 95px; right: 10px;"> Conf. Avançadas
+    </button>
   </div>
 </div>
 
@@ -45,7 +48,7 @@
         <input class="form-control" disabled type="text" value="{{notationProperties.businessObject.di.id}}">
       </div>
       <div class="col-sm-6">
-        <label> Display_Name: </label>
+        <label> Nome: </label>
         <input class="form-control" disabled type="text" value="{{notationProperties.businessObject.name || 'N/A'}}">
       </div>
     </div>
@@ -79,7 +82,8 @@
             <label>
               <span data-toggle="tooltip" data-placement="top"
                     title="Quantidade maxima de peças que a maquina suporta produzir, geralmente especificada pelo fabricante.">Quantidade maxima de peças:</span>
-              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!" type="text">
+              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!"
+                     type="text">
             </label>
           </div>
         </div>
@@ -93,7 +97,8 @@
           <div class="col-sm-6">
             <label>
               Quantidade produzida atualmente:
-              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!" type="text">
+              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!"
+                     type="text">
             </label>
           </div>
         </div>
@@ -101,8 +106,31 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button (click)="saveNotation(setNotationName(notationProperties.businessObject.di.id)); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark"
+    <button (click)="saveNotation(setNotationName(notationProperties.businessObject.di.id)); d('SaveClick')"
+            [disabled]="!mainform.valid" class="btn btn-outline-dark"
             type="button"> Salvar!
     </button>
+  </div>
+</ng-template>
+
+
+<ng-template #adviseModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 align="center">Aviso de uso!</h4>
+    <button (click)="d('Cross click')" aria-label="Close" class="close" type="button">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p align="justify"> Esta área é destinada para o desenvolvimento do modelo visual, ela não comporta relacionamento
+      com dependência
+      nem o processo de otimização. Caso queira utiliza-lo finalize a criação do modelo e clique em “Configurações
+      avançadas” na lateral superior direita. <br>
+      Em caso de dúvida contate o administrador do sistema.
+    </p>
+    <h6 align="right">Att. Primum Tecnologia </h6>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline-dark" (click)="d('Cross click')" type="button"> Sair!</button>
   </div>
 </ng-template>

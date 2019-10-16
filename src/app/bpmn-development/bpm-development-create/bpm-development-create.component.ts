@@ -1,15 +1,13 @@
 import {
   Component,
   AfterContentInit,
-  OnDestroy
+  OnDestroy, ViewChild
 } from '@angular/core';
 
 import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.development.js'; // Habilita a opção de modelar
 
-// import * as Viewer from 'bpmn-js/dist/bpmn-viewer.development.js'; // Apenas para visualização
 import * as $ from 'jquery';
 import * as xml2js from 'xml2js';
-import {ModalService} from '../../Service/modal.service';
 import {Diagram} from 'src/app/Models/diagram';
 import {FormBuilder} from '@angular/forms';
 import {Notation} from 'src/app/Models/notation';
@@ -37,12 +35,12 @@ const INIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
 export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestroy {
   thisDiagramId: any;
   diagram: any;
-  diagramName = '';
   title = 'GO-pn | Criar diagrama';
   modeler = new BpmnJS();
   diagramNot = new Array();
   notationProperties: any;
   mainform: any;
+  @ViewChild('adviseModal', {static: false}) adviseModel;
 
 
   constructor(
@@ -54,13 +52,11 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
   ) {
   }
 
-  // If there is no erros can be removed!
-  // onSubmit() {
-  //   // TODO: Use EventEmitter with form value
-  //   console.warn(this.mainform.value);
-  // }
-
   ngAfterContentInit(): void {
+    setTimeout(() => {
+      this.modalService.open(this.adviseModel, {centered: true});
+    }, 100);
+
     this.route.params.subscribe(params => {
       this.thisDiagramId = params['id'];
       this.genericDataService.getObjectById('diagrams', this.thisDiagramId).subscribe(
@@ -86,10 +82,26 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
         this.getCurrentXML();
       }, 1);
     });
-    eventBus.on('element.click', (event, payload) => {
-      if (payload.element.type !== 'bpmn:SequenceFlow') {
-        $('.bpmn-icon-trash').hide();
-      }
+    eventBus.on('shape.removed', (event, payload) => {
+      setTimeout(() => {
+        // this.deleteMe(event.element.businessObject.di.id);
+        this.genericDataService.searchByNotationCode(event.element.businessObject.di.id).subscribe(
+          (data) => {
+            this.genericDataService.deleteObject('notations', data[0].id).subscribe(
+              () => {
+                this.saveXML();
+              },
+              (err) => {
+                alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
+                console.log(err);
+              }
+            );
+          },
+          () => {
+            this.saveXML();
+          }
+        );
+      }, 1);
     });
   }
 
@@ -110,24 +122,11 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
         this.mainform.get('can_handle_attributes.time').setValue(nt.can_handle.time);
         this.mainform.get('can_produce_attributes.quantity').setValue(nt.can_produce.quantity);
         this.mainform.get('can_produce_attributes.time').setValue(nt.can_produce.time);
-        console.log(this.mainform.value);
       }
     );
 
     this.modalService.open(content, {size: 'lg'});
   }
-
-  // Probably we're going to use it at otimization
-  // changeColorXML(NOTATION_ID) {
-  //   const elementRegistry = this.modeler.get('elementRegistry');
-  //   const modeling = this.modeler.get('modeling');
-  //   const shape = elementRegistry.get(NOTATION_ID);
-  //   modeling.setColor(shape, {
-  //     stroke: 'red',
-  //     fill: 'white'
-  //   });
-  // }
-
 
   deleteMe(variable: any) {
     const elementRegistry = this.modeler.get('elementRegistry');
@@ -142,7 +141,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
             this.saveXML();
           },
           (err) => {
-            console.log('Didn\'t worked! Err: \n');
+            alert('Um erro aconteceu ao realizar a requisição!');
             console.log(err);
           }
         );
@@ -172,7 +171,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
             this.saveXML();
           },
           (err) => {
-            console.log('Didn\'t worked! Err: \n');
+            alert('Um erro aconteceu ao realizar a requisição!');
             console.log(err);
           }
         );
@@ -183,7 +182,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
             this.saveXML();
           },
           (err) => {
-            console.log('Didn\'t worked! Err: \n');
+            alert('Um erro aconteceu ao realizar a requisição!');
             console.log(err);
           }
         );
@@ -201,17 +200,25 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       dg.bpm_diagram_code = CHANGED_XML.toString();
     });
     dg.notation = this.diagramNot;
-    console.warn(dg);
 
     this.genericDataService.updateObject('diagrams', dg).subscribe(
       (data) => {
         alert('Salvo!');
       },
       (err) => {
-        console.log('Didn\'t worked! Err: ');
+        alert('Um erro aconteceu ao realizar a requisição!');
         console.log(err);
       }
     );
+  }
+
+  goToViewConfigurations() {
+    this.saveXML();
+
+    setTimeout(() => {
+      this.router.navigate(['menu/view/' + this.diagram.id]);
+    }, 1000);
+
   }
 
 
@@ -263,10 +270,7 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       }),
       can_handle_attributes: this.formBuilder.group({
         time: [''],
-        quantity: [''] // ,
-        // resource: this.formBuilder.group({
-        //   name: [''],
-        // })
+        quantity: ['']
       }),
       can_produce_attributes: this.formBuilder.group({
         time: [''],
@@ -275,7 +279,6 @@ export class BpmDevelopmentCreateComponent implements AfterContentInit, OnDestro
       isConstraint: false,
       diagram_id: []
     });
-    // dependencies: Notation;
   }
 
   setNotationName(value: string) {

@@ -1,7 +1,7 @@
 <!-- Top navigation -->
 <div style="height: 52px;" class="topnav">
-  <div class="topnav">
-    {{url}}
+  <div class="topnav" *ngIf="this.router.url.includes('menu/view/') || this.router.url.includes('menu/create/')">
+    <a style="padding: 0px; padding-left: 10px; padding-bottom: 20px;" routerLink="/menu"><h1><i class="arrow left"></i></h1></a>
   </div>
 
   <!-- Centered link -->

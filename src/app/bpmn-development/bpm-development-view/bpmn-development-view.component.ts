@@ -1,7 +1,7 @@
 import {
   Component,
   AfterContentInit,
-  OnDestroy, OnInit
+  OnDestroy
 } from '@angular/core';
 
 import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.development.js'; // Habilita a opção de modelar
@@ -15,7 +15,6 @@ import {Notation} from 'src/app/Models/notation';
 import {GenericDataServiceService} from '../../Service/generic-data-service.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {of} from 'rxjs';
 
 @Component({
   selector: 'app-bpmn-development-view',
@@ -31,12 +30,10 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
   diagramNot = new Array();
   notationProperties: any;
   mainform: any;
-  modelerStr = 'viewer';
   editEnable = false;
   dropdownList = [];
   selectedList = [];
   dropdownSettings = {};
-  relQuantityForWhoDependsOnMeRelated = 0;
 
   constructor(
     private modalService: NgbModal,
@@ -57,7 +54,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
           this.initializeBPMDiagramModeler();
         },
         (err) => {
-          alert('An error ocurred! Err: ' + err);
+          alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
           this.router.navigate(['/menu']);
         }
       );
@@ -74,10 +71,32 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
         this.getCurrentXML();
       }, 1);
     });
-    eventBus.on('element.click', (event, payload) => {
-      if (payload.element.type !== 'bpmn:SequenceFlow') {
-        $('.bpmn-icon-trash').hide();
-      }
+    // eventBus.on('element.click', (event, payload) => {
+    //   if (payload.element.type !== 'bpmn:SequenceFlow') {
+    //     $('.bpmn-icon-trash').hide();
+    //   }
+    // });
+
+    eventBus.on('shape.removed', (event, payload) => {
+      setTimeout(() => {
+        // this.deleteMe(event.element.businessObject.di.id);
+        this.genericDataService.searchByNotationCode(event.element.businessObject.di.id).subscribe(
+          (data) => {
+            this.genericDataService.deleteObject('notations', data[0].id).subscribe(
+              () => {
+                this.saveXML();
+              },
+              (err) => {
+                alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
+                console.log(err);
+              }
+            );
+          },
+          () => {
+            this.saveXML();
+          }
+        );
+      }, 1);
     });
   }
 
@@ -294,7 +313,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
             this.saveXML();
           },
           (err) => {
-            console.log('Didn\'t worked! Err: \n');
+            alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
             console.log(err);
           }
         );
@@ -326,7 +345,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
             this.saveXML();
           },
           (err) => {
-            console.log('Didn\'t worked! Err: \n');
+            alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
             console.log(err);
           }
         );
@@ -337,7 +356,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
             this.saveXML();
           },
           (err) => {
-            console.log('Didn\'t worked! Err: \n');
+            alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
             console.log(err);
           }
         );
@@ -360,7 +379,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
         alert('Salvo!');
       },
       (err) => {
-        console.log('Didn\'t worked! Err: ');
+        alert('Ocorreu um erro ao realizar a requisição, erro: ' + err);
         console.log(err);
       }
     );
@@ -412,10 +431,7 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
       }),
       can_handle_attributes: this.formBuilder.group({
         time: [''],
-        quantity: [''] // ,
-        // resource: this.formBuilder.group({
-        //   name: [''],
-        // })
+        quantity: ['']
       }),
       can_produce_attributes: this.formBuilder.group({
         time: [''],
