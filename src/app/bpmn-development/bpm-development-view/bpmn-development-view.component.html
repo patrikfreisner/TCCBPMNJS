@@ -33,6 +33,9 @@
     <button (click)="optimizingProcess()" class="btn btn-default btn-light"
             style="border: solid 1px black;z-index: 1; position: absolute; top: 135px; right: 10px;">Aplicar TOC!
     </button>
+    <button (click)="helpAssistant(helpAssistantContent)" class="btn btn-default btn-outline-primary"
+            style="z-index: 2; border: solid 1px #007bff; position: absolute; bottom: 10px; right: 10px;">Ajuda?
+    </button>
   </div>
 </div>
 
@@ -86,7 +89,8 @@
             <label>
               <span data-toggle="tooltip" data-placement="top"
                     title="Quantidade maxima de peças que a maquina suporta produzir, geralmente especificada pelo fabricante.">Quantidade maxima de peças:</span>
-              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!" type="text">
+              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!"
+                     type="text">
             </label>
           </div>
         </div>
@@ -94,13 +98,14 @@
           <div class="col-sm-6">
             <label>
               Tempo de produção atual:
-              <input class="form-control" formControlName="time" placeholder="Indique o tempo em minutos!"  type="text">
+              <input class="form-control" formControlName="time" placeholder="Indique o tempo em minutos!" type="text">
             </label>
           </div>
           <div class="col-sm-6">
             <label>
               Quantidade produzida atualmente:
-              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!" type="text">
+              <input class="form-control" formControlName="quantity" placeholder="Indique a quantidade de peças!"
+                     type="text">
             </label>
           </div>
         </div>
@@ -117,8 +122,149 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button (click)="saveNotation(setNotationName(notationProperties.businessObject.di.id)); d('SaveClick')" [disabled]="!mainform.valid" class="btn btn-outline-dark"
+    <button (click)="saveNotation(setNotationName(notationProperties.businessObject.di.id)); d('SaveClick')"
+            [disabled]="!mainform.valid" class="btn btn-outline-dark"
             type="button"> Salvar!
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #helpAssistantContent let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title-guide"> Guias para restrições! </h4>
+    <button (click)="d('Cross click')" aria-label="Close" class="close" type="button">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="advise-header">
+      <p align="justify">
+        <b>Bem-vindo ao sistema de otimização de processos.</b>
+        <br>
+        Com o auxílio desse software será possível salvar todo um processo de forma pratica e fácil, além disso
+        utilizando da teoria desenvolvida pelo físico <b>Eliyahu M. Goldratt</b> e demonstrada no livro <b>“A Meta”</b>,
+        podemos
+        verifica se nosso sistema tem restrições (Gargalos) a partir dos indicadores de performance (Peças produzidas,
+        metas fechadas, entregar da equipe, etc).
+        <br><br>
+        O sistema, como já dito, é prático e é aplicável para qualquer processo em que suas atividades podem ser
+        mensuráveis. A maneira de entender se uma restrição é reversível ou como podemos trabalhar nela, pode ser
+        observado pelos quadros abaixo que ensinam como entender os indicadores de forma fácil.
+
+        Tenha bom proveito!
+      </p>
+      <h6 align="right">Att. Equipe Primum</h6>
+    </div>
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            Sem restrição!
+          </h5>
+        </div>
+
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            <p align="justify">
+              No caso das notações estarem com as bordas totalmente pretas, <b>PARABÉNS</b>, seu sistema está totalmente
+              estável
+              e equilibrado. Nesse caso não há atitudes a ser tomadas, lembre-se apenas que para qualquer variação dos
+              dados nas atividades deve-se atualizar aqui para que tenhamos uma nova otimização e assim verificar se o
+              sistema foi impactado com as mudanças de alguma forma.
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-header" id="headingTwo">
+          <h5 class="mb-0">
+            Indicadores de produção acima do necessario!
+          </h5>
+        </div>
+        <div id="collapseTwo" class="collapse  show" aria-labelledby="headingTwo" data-parent="#accordion">
+          <div class="card-body">
+            <p align="justify">
+              No caso do seu sistema conter algumas atividades com bordas <b style="color: blue;">azuis</b> significa
+              que a atividade em questão
+              está produzindo mais que o necessário. Esta informações deve ser utilizada para tomar decisões
+              importantes, mesmo não sendo necessariamente uma restrição, esse tipo de superprodução no caso de uma
+              fábrica pode gerar quantidades de peças acima do necessária causando assim, um aumento no estoque de
+              peças, podendo desestabilizar ou gerar uma nova restrição.
+              <br><br>
+              Procure manter seu sistema devidamente equilibrado, nem sempre produzir mais que o necessário significa
+              lucro ou então que seus funcionários estão sendo mais produtivos, as vezes essa superprodução pode trazer
+              encargos em almoxarifado ou criar novas restrições posteriormente.
+
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-header" id="headingThree">
+          <h5 class="mb-0">
+            Restrição com possibilidade de exploração de recurso!
+          </h5>
+        </div>
+        <div id="collapseThree" class="collapse  show" aria-labelledby="headingTwo" data-parent="#accordion">
+          <div class="card-body">
+            <p align="justify">
+              No caso do seu sistema conter algumas atividades com bordas <b style="color: orange">laranja</b> significa
+              que ele contém uma
+              restrição, desta forma todo seu processo está sujeito a limitar-se a velocidade do processo com restrição.
+              Geralmente isso ocorre pois uma atividade não entrega o suficiente para suas dependências, dessa forma
+              temos uma produção menor do que a esperada e assim limitamos as produções subsequentes a esse mesmo volume
+              de entrega.
+              O que pode ser feito? Veja abaixo algumas soluções:
+            </p>
+            <ul>
+              <li>
+                Explore o seu recurso, verifique se a atividade com restrição não pode produzir mais peças ou
+                realizar mais entregas. Geralmente o indicador de “Quantidade máxima de peças” mostra o quando essa
+                restrição pode ser explorada ainda. Geralmente quando a cor é ainda laranja a restrição pode ser
+                explorada!
+              </li>
+              <li>
+                Verifique se as suas entregas precisam realmente passar por aquela atividade, as vezes entregas
+                passam por atividades simplesmente por seguir um mesmo fluxo e não necessariamente por precisar passar
+                por lá.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-header" id="headingFour">
+          <h5 class="mb-0">
+            Restrição com necessidade de investimento de recurso!
+          </h5>
+        </div>
+        <div id="collapseFour" class="collapse  show" aria-labelledby="headingTwo" data-parent="#accordion">
+          <div class="card-body">
+            <p align="justify">
+              No caso do seu sistema conter algumas atividades com bordas <b style="color: red">vermelha</b> significa que ele está operando em
+              seu máximo, sem possibilidade de exploração de recursos. Neste caso, após uma análise da situação do nosso
+              processo temos de optar por baixar a capacidade de todo o sistema até se igualar a restrição, para assim
+              evitar desperdício de materiais e de acumulo de estoque ou serviços parados ou então partir para
+              investimentos reais, como por exemplo a compra de uma nova máquina ou então contratação de novos
+              funcionários.
+              <br><br>
+              Cuidado antes de qualquer investimento, verifique se a atividade não pode ser explorada, verifique manuais
+              de instalação no caso de maquinas para dados de produção máxima ou então veja se nenhuma das atividades
+              está sendo mal executada. Faça esse passo com cautela.
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button (click)="d('Cross click')" class="btn btn-outline-dark"
+            type="button"> Fechar!
     </button>
   </div>
 </ng-template>

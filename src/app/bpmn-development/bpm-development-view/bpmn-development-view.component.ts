@@ -248,7 +248,11 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
                 }
 
                 if (thisAllItems.toFixed(2) >= allNeededItems.toFixed(2)) {
-                  this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+                  if (thisAllItems.toFixed(2) > allNeededItems.toFixed(2)) {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'blue');
+                  } else {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+                  }
                 } else {
                   if (thisMaxItems.toFixed(2) >= allNeededItems.toFixed(2)) {
                     this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), '#ff9900');
@@ -280,7 +284,11 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
                   allNeededItems = allNeededItems - allNonNeededItems;
                 }
                 if (thisOneItems.toFixed(2) >= allNeededItems.toFixed(2)) {
-                  this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+                  if (thisOneItems.toFixed(2) > allNeededItems.toFixed(2)) {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'blue');
+                  } else {
+                    this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), 'black');
+                  }
                 } else {
                   if (thisOneMaxItems.toFixed(2) >= allNeededItems.toFixed(2)) {
                     this.changeColorXML(notation.bpm_notation_code.replace('_di', ''), '#ff9900');
@@ -383,6 +391,10 @@ export class BpmnDevelopmentViewComponent implements AfterContentInit, OnDestroy
         console.log(err);
       }
     );
+  }
+
+  helpAssistant(content): void {
+    this.modalService.open(content, {size: 'lg'});
   }
 
   getNotationInfo(notationId: any) {

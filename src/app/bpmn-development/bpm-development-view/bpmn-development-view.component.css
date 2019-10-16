@@ -61,3 +61,7 @@ hr.vertical-rule {
 .disabledBackdrop {
   display: none;
 }
+
+.advise-header {
+  margin-bottom: 25px;
+}
